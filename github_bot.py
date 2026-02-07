@@ -68,7 +68,7 @@ def get_weather():
         return None
 
 def format_weather_message(weather_data):
-    """Форматирование сообщения о погоде"""
+    """Форматирование сообщения о погоде с графиком"""
     if not weather_data:
         return "⚠️ Не удалось получить данные о погоде. Попробуйте позже."
     
@@ -99,26 +99,35 @@ def format_weather_message(weather_data):
         
         date_str = f"{days_ru[now.weekday()]}, {now.day} {months_ru[now.month-1]} {now.year}"
         
-        # Сообщение (ваш формат)
+        # Получаем прогноз для графика
+        forecast = get_forecast()
+        chart = create_chart(forecast)
+        
+        # Форматирование сообщения
         message = f"""🌅 Доброе утро!
 
 📍 {city}
 🗓️ {date_str}
 ⏰ {now.strftime('%H:%M')}
 
-🌤️ Погода сегодня:
+🌤️ Погода сейчас:
 • Состояние: {description}
 • Температура: {temp:.0f}°C (ощущается как {feels_like:.0f}°C)
 • Ветер: 💨 {wind_speed:.1f} м/с, {wind_dir}
 • Днём: от {temp_min:.0f}°C до {temp_max:.0f}°C
-
-Хорошего дня! 👋"""
+"""
+        
+        # Добавляем график если есть
+        if chart:
+            message += f"\n{chart}\n"
+        
+        message += "Хорошего дня! 👋"
         
         return message
         
     except Exception as e:
-        print(f"❌ Ошибка форматирования: {e}")
-        return f"🌤️ Погода в Тамани: {weather_data['main']['temp']:.0f}°C, {weather_data['weather'][0]['description']}"
+        print(f"❌ Ошибка создания сообщения: {e}")
+        return f"🌤️ Погода в Тамани: {weather_data['main']['temp']:.0f}°C"
 
 async def send_weather_message():
     """Отправка сообщения"""
@@ -149,4 +158,5 @@ async def main():
     print("=" * 50)
 
 if __name__ == "__main__":
+
     asyncio.run(main())
